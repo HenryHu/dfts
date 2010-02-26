@@ -1,4 +1,4 @@
-// Last modified: 2010-02-26 21:58:37 henryhu
+// Last modified: 2010-02-26 23:16:24 henryhu
 #ifndef __DTFS_MSGRECEIVER_H_
 #define __DTFS_MSGRECEIVER_H_
 #include <prio.h>
@@ -15,7 +15,7 @@ private:
 	int tcpPort;
 	Core *core;
 	void processConnection(PRFileDesc *conn, PRNetAddr *addr, PRInt16 cmd);
-	void parsePacket(PRNetAddr* src, int len, char *buffer);
+	void parsePacket(const PRNetAddr& src, int len, char *buffer);
 
 public:
 	void run();
