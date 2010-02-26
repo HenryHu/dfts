@@ -71,14 +71,14 @@ void MsgReceiver::run()
 	}
 
 	PRPollDesc pd[2];
-	pd[0].fd = udpSock;
-	pd[0].in_flags = PR_POLL_READ | PR_POLL_EXCEPT;
-	pd[1].fd = tcpSock;
-	pd[1].in_flags = PR_POLL_READ | PR_POLL_EXCEPT;
 
 	char *udpBuffer = new char[UDP_PACKET_LEN_LIMIT];
 	while (true)
 	{
+		pd[0].fd = udpSock;
+		pd[1].fd = tcpSock;
+		pd[0].in_flags = PR_POLL_READ | PR_POLL_EXCEPT;
+		pd[1].in_flags = PR_POLL_READ | PR_POLL_EXCEPT;
 		int ret = PR_Poll(pd, 2, PR_INTERVAL_NO_TIMEOUT);
 		if (ret == -1)
 		{
@@ -93,7 +93,7 @@ void MsgReceiver::run()
 				int len = PR_RecvFrom(udpSock, udpBuffer, UDP_PACKET_LEN_LIMIT, 
 						0, &remoteAddr, PR_INTERVAL_NO_TIMEOUT);
 				if (len > 0)
-					parsePacket(&remoteAddr, len, udpBuffer);
+					parsePacket(remoteAddr, len, udpBuffer);
 				else
 					LogMsg(LOG_WARN, "receive UDP packet failed.\n");
 			} else {
@@ -144,7 +144,7 @@ void MsgReceiver::processConnection(PRFileDesc *conn, PRNetAddr *addr, PRInt16 c
 				int rlen = PR_Recv(conn, data, len, 0, TCP_LOSSABLE_TIMEOUT);
 				if (rlen == len)
 				{
-					parsePacket(addr, len, data);
+					parsePacket(*addr, len, data);
 				}
 				delete[] data;
 			} else {
@@ -161,7 +161,25 @@ void MsgReceiver::processConnection(PRFileDesc *conn, PRNetAddr *addr, PRInt16 c
 	}
 }
 
-void MsgReceiver::parsePacket(PRNetAddr *addr, int len, char *data)
+void MsgReceiver::parsePacket(const PRNetAddr &addr, int len, char *data)
 {
-	LogMsg(LOG_DEBUG, "lossable packet received.\n");
+	LogMsg(LOG_DEBUG, "lossable packet received. len: %d\n", len);
+	if (len < 2)
+		return;
+	PRInt16 cmd = PR_ntohs(*((PRInt16 *)data));
+	switch (cmd)
+	{
+		case INT_CMD_FIND_NEIGHBOUR:
+			LogMsg(LOG_DEBUG, "someone is finding neighbour\n");
+//			NeighbourReplyPacket nrp(core->getName());
+//			sendMsg(addr, nrp.getLen(), nrp.getData());
+			break;
+		case INT_CMD_NEIGHBOUR_REPLY:
+			LogMsg(LOG_DEBUG, "received reply from neighbour\n");
+//			core->getUserManager()->parseNeighbourReply(addr, len, data);
+			break;
+		default:
+			LogMsg(LOG_DEBUG, "unknown message: %d\n", cmd);
+	}
 }
+
