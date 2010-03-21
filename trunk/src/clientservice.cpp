@@ -8,6 +8,11 @@
 #include "clientcommand.h"
 #include <strings.h>
 #include "usermanager.h"
+#include <list>
+#include "user.h"
+#include <prnetdb.h>
+#include <prprf.h>
+using namespace std;
 
 ClientService::ClientService(PRFileDesc *csock, 
 		const PRNetAddr &servaddr, const PRNetAddr &cliaddr,
@@ -47,7 +52,6 @@ void ClientService::run()
 			LogMsg(LOG_WARN, "invalid command len %d\n", ret);
 			continue;
 		}
-		printf("len: %d", ret);
 		ClientCommand cc = parseCmd(cmd);
 		switch (cc)
 		{
@@ -59,14 +63,62 @@ void ClientService::run()
 				LogMsg(LOG_DEBUG, "find neighbour.\n");
 				findEOL();
 				// XXX call userManager to find neighbour
-				//
 				core->getUserManager()->findNeighbour();
 				break;
 			case CLI_CMD_GET_NEIGHBOUR:
+				{
 				LogMsg(LOG_DEBUG, "get neighbour.\n");
 				findEOL();
-				// XXX from userManager get neighbour
+				// from userManager get neighbour
+				list<User *> ret = core->getUserManager()->getNeighbourList();
+				char *buf = new char[500];
+				char *buf2 = new char[100];
+				PRNetAddr addr;
+				addr.inet.family = PR_AF_INET;
+				for (list<User *>::iterator it = ret.begin(); it!=ret.end(); it++)
+				{
+					User *user = *it;
+					addr.inet.ip = user->getIP();
+					PR_NetAddrToString(&addr, buf2, 100);
+					int len = PR_snprintf(buf, 500, "%s %s %d %s", user->getKey().c_str(), buf2,
+							user->getPort(), user->getName().c_str());
+					// PR_snprintf ensures that NULL terminates
+					// and len does not include NULL
+					buf[len] = '\n';
+					PR_Send(cliSock, buf, len+1, 0, PR_INTERVAL_NO_TIMEOUT);
+				}
+				PR_Send(cliSock, "EOL\n", 4, 0, PR_INTERVAL_NO_TIMEOUT);
 				break;
+				}
+			case CLI_CMD_GET_OTHER:
+				{
+				LogMsg(LOG_DEBUG, "get other people.\n");
+				findEOL();
+				// from userManager get neighbour
+				list<User *> ret = core->getUserManager()->getOtherList();
+				char *buf = new char[500];
+				char *buf2 = new char[100];
+				PRNetAddr addr;
+				addr.inet.family = PR_AF_INET;
+				for (list<User *>::iterator it = ret.begin(); it!=ret.end(); it++)
+				{
+					User *user = *it;
+					addr.inet.ip = user->getIP();
+					PR_NetAddrToString(&addr, buf2, 100);
+					int len = PR_snprintf(buf, 500, "%s %s %d %s", user->getKey().c_str(), buf2,
+							user->getPort(), user->getName().c_str());
+					// PR_snprintf ensures that NULL terminates
+					// and len does not include NULL
+					buf[len] = '\n';
+					PR_Send(cliSock, buf, len+1, 0, PR_INTERVAL_NO_TIMEOUT);
+				}
+				PR_Send(cliSock, "EOL\n", 4, 0, PR_INTERVAL_NO_TIMEOUT);
+				break;
+				}
+			default:
+				LogMsg(LOG_WARN, "unknown command %c%c%c%c\n", 
+						cmd[0], cmd[1], cmd[2], cmd[3]);
+				findEOL();
 		}
 		if (closeConn) break;
 	}

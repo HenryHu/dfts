@@ -1,4 +1,4 @@
-// Last Modified: 2010-03-21 20:40:27 henryhu
+// Last Modified: 2010-03-21 23:14:40 henryhu
 #include "userhash.h"
 #include "config.h"
 #include <string>
@@ -11,20 +11,25 @@ UserHash::UserHash()
 	list = new UserHashNode*[USERHASH_INIT_SIZE];
 	for (int i=0; i<USERHASH_INIT_SIZE; i++)
 		list[i] = NULL;
+	lock = PR_NewLock();
 }
 
 User *UserHash::findByKey(const string& key)
 {
 	int hash = strHash(key);
+	PR_Lock(lock);
 	UserHashNode *u = list[hash];
 	while (u != NULL)
 	{
 		if (u->getKey() == key)
 		{
-			return u->getUser();
+			User *user = u->getUser();
+			PR_Unlock(lock);
+			return user;
 		}
 		u = u->getNext();
 	}
+	PR_Unlock(lock);
 	return NULL;
 }
 
@@ -32,7 +37,9 @@ void UserHash::insert(User *user)
 {
 	int hash = strHash(user->getKey());
 	UserHashNode *u = new UserHashNode(user, list[hash]);
+	PR_Lock(lock);
 	list[hash] = u;
+	PR_Unlock(lock);
 }
 
 const string& UserHash::UserHashNode::getKey()

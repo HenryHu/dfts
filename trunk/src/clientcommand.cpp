@@ -6,6 +6,7 @@ char* ClientCommandName[] = {
 	"quit",
 	"find",
 	"getn",
+	"geto",
 };
 
 const int CLI_CMD_COUNT = sizeof(ClientCommandName) / sizeof(char*);
