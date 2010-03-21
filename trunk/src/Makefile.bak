@@ -1,23 +1,23 @@
 CXX = g++
-CXXFLAGS = -I/usr/local/include/nspr -g
-LDFLAGS = -L/usr/local/lib -lnspr4
+CXXFLAGS = -I/usr/local/include/nspr -g -I/usr/local/include/cryptopp -pipe -fno-strict-aliasing
+LDFLAGS = -L/usr/local/lib  -lcryptopp -pthread -lnspr4
 SRCS = clientmanager.cpp config.cpp clientservice.cpp logger.cpp clientcommand.cpp netmgr.cpp main.cpp core.cpp usermanager.cpp filemanager.cpp \
-	   packet.cpp
-OBJS = clientmanager.o config.o clientservice.o logger.o clientcommand.o netmgr.o main.o core.o usermanager.o filemanager.o packet.o
+	   packet.cpp keymgr.cpp
+OBJS = clientmanager.o config.o clientservice.o logger.o clientcommand.o netmgr.o main.o core.o usermanager.o filemanager.o packet.o keymgr.o
 
 all: dfts ctags
 
 dfts: ${OBJS}
-	${CXX} ${CXXFLAGS} ${LDFLAGS} ${OBJS} -o $@
+	${CXX} ${CXXFLAGS} ${OBJS} ${LDFLAGS} -o $@
 
 ctags:
-	exctags *.cpp *.h
+	exctags -R *.cpp *.h /usr/local/include/nspr/ /usr/local/include/cryptopp/
 
 clean:
 	rm -f ${OBJS} dfts
 
 depend:
-	makedepend -- ${CXXFLAGS} -- ${SRCS}
+	makedepend -- ${CXXFLAGS} -I/usr/include/c++/4.2/ -- ${SRCS}
 # DO NOT DELETE
 
 clientmanager.o: clientmanager.h /usr/local/include/nspr/prio.h
@@ -39,8 +39,8 @@ clientmanager.o: /usr/include/arpa/inet.h /usr/include/netdb.h
 clientmanager.o: /usr/include/rpc/types.h /usr/include/sys/time.h
 clientmanager.o: /usr/include/time.h /usr/include/netconfig.h
 clientmanager.o: /usr/local/include/nspr/prthread.h clientservice.h core.h
-clientmanager.o: usermanager.h packet.h filemanager.h clientcommand.h
-clientmanager.o: config.h threadwrap.h /usr/local/include/nspr/prnetdb.h
+clientmanager.o: clientcommand.h config.h threadwrap.h
+clientmanager.o: /usr/local/include/nspr/prnetdb.h
 config.o: config.h
 clientservice.o: clientservice.h /usr/local/include/nspr/prio.h
 clientservice.o: /usr/local/include/nspr/prlong.h
@@ -60,9 +60,9 @@ clientservice.o: /usr/include/netinet/in.h /usr/include/netinet6/in6.h
 clientservice.o: /usr/include/arpa/inet.h /usr/include/netdb.h
 clientservice.o: /usr/include/rpc/types.h /usr/include/sys/time.h
 clientservice.o: /usr/include/time.h /usr/include/netconfig.h
-clientservice.o: /usr/local/include/nspr/prthread.h core.h usermanager.h
-clientservice.o: packet.h filemanager.h clientcommand.h config.h
-clientservice.o: /usr/include/stdio.h threadwrap.h /usr/include/strings.h
+clientservice.o: /usr/local/include/nspr/prthread.h core.h clientcommand.h
+clientservice.o: config.h /usr/include/stdio.h threadwrap.h
+clientservice.o: /usr/include/strings.h usermanager.h packet.h
 logger.o: config.h /usr/include/stdarg.h /usr/include/sys/cdefs.h
 logger.o: /usr/include/sys/_types.h /usr/include/machine/_types.h
 logger.o: /usr/include/stdio.h /usr/include/sys/_null.h
@@ -75,7 +75,7 @@ logger.o: /usr/include/sys/_sigset.h /usr/include/sys/_timeval.h
 logger.o: /usr/include/sys/timespec.h /usr/local/include/nspr/prerr.h
 logger.o: /usr/include/string.h /usr/include/strings.h
 clientcommand.o: clientcommand.h
-netmgr.o: threadwrap.h config.h /usr/local/include/nspr/prio.h
+netmgr.o: netmgr.h /usr/local/include/nspr/prio.h
 netmgr.o: /usr/local/include/nspr/prlong.h /usr/local/include/nspr/prtypes.h
 netmgr.o: /usr/local/include/nspr/prcpucfg.h /usr/include/stddef.h
 netmgr.o: /usr/include/sys/cdefs.h /usr/include/sys/_null.h
@@ -91,10 +91,11 @@ netmgr.o: /usr/include/machine/param.h /usr/include/netinet/in.h
 netmgr.o: /usr/include/netinet6/in6.h /usr/include/arpa/inet.h
 netmgr.o: /usr/include/netdb.h /usr/include/rpc/types.h
 netmgr.o: /usr/include/sys/time.h /usr/include/time.h
-netmgr.o: /usr/include/netconfig.h /usr/local/include/nspr/prthread.h
-netmgr.o: /usr/local/include/nspr/prnetdb.h intercmd.h
-netmgr.o: /usr/local/include/nspr/prerror.h /usr/local/include/nspr/prerr.h
-netmgr.o: packet.h
+netmgr.o: /usr/include/netconfig.h /usr/local/include/nspr/prthread.h core.h
+netmgr.o: /usr/local/include/nspr/prtpool.h /usr/local/include/nspr/prerror.h
+netmgr.o: /usr/local/include/nspr/prerr.h packet.h threadwrap.h config.h
+netmgr.o: /usr/local/include/nspr/prnetdb.h intercmd.h usermanager.h
+netmgr.o: filemanager.h
 main.o: clientmanager.h /usr/local/include/nspr/prio.h
 main.o: /usr/local/include/nspr/prlong.h /usr/local/include/nspr/prtypes.h
 main.o: /usr/local/include/nspr/prcpucfg.h /usr/include/stddef.h
@@ -111,26 +112,11 @@ main.o: /usr/include/netinet/in.h /usr/include/netinet6/in6.h
 main.o: /usr/include/arpa/inet.h /usr/include/netdb.h
 main.o: /usr/include/rpc/types.h /usr/include/sys/time.h /usr/include/time.h
 main.o: /usr/include/netconfig.h /usr/local/include/nspr/prthread.h
-main.o: clientservice.h core.h usermanager.h packet.h filemanager.h
-main.o: clientcommand.h netmgr.h /usr/local/include/nspr/prtpool.h
+main.o: clientservice.h core.h clientcommand.h usermanager.h packet.h
+main.o: netmgr.h /usr/local/include/nspr/prtpool.h
 main.o: /usr/local/include/nspr/prerror.h /usr/local/include/nspr/prerr.h
 main.o: config.h /usr/local/include/nspr/prnetdb.h
-core.o: core.h usermanager.h /usr/local/include/nspr/prio.h
-core.o: /usr/local/include/nspr/prlong.h /usr/local/include/nspr/prtypes.h
-core.o: /usr/local/include/nspr/prcpucfg.h /usr/include/stddef.h
-core.o: /usr/include/sys/cdefs.h /usr/include/sys/_null.h
-core.o: /usr/include/sys/_types.h /usr/include/machine/_types.h
-core.o: /usr/local/include/nspr/obsolete/protypes.h /usr/include/sys/types.h
-core.o: /usr/include/machine/endian.h /usr/include/sys/_pthreadtypes.h
-core.o: /usr/include/sys/select.h /usr/include/sys/_sigset.h
-core.o: /usr/include/sys/_timeval.h /usr/include/sys/timespec.h
-core.o: /usr/local/include/nspr/prtime.h /usr/local/include/nspr/prinrval.h
-core.o: /usr/local/include/nspr/prinet.h /usr/include/sys/socket.h
-core.o: /usr/include/sys/_iovec.h /usr/include/machine/param.h
-core.o: /usr/include/netinet/in.h /usr/include/netinet6/in6.h
-core.o: /usr/include/arpa/inet.h /usr/include/netdb.h
-core.o: /usr/include/rpc/types.h /usr/include/sys/time.h /usr/include/time.h
-core.o: /usr/include/netconfig.h packet.h filemanager.h
+core.o: core.h
 usermanager.o: usermanager.h /usr/local/include/nspr/prio.h
 usermanager.o: /usr/local/include/nspr/prlong.h
 usermanager.o: /usr/local/include/nspr/prtypes.h
@@ -148,8 +134,12 @@ usermanager.o: /usr/include/sys/_iovec.h /usr/include/machine/param.h
 usermanager.o: /usr/include/netinet/in.h /usr/include/netinet6/in6.h
 usermanager.o: /usr/include/arpa/inet.h /usr/include/netdb.h
 usermanager.o: /usr/include/rpc/types.h /usr/include/sys/time.h
-usermanager.o: /usr/include/time.h /usr/include/netconfig.h core.h
-usermanager.o: filemanager.h packet.h config.h
+usermanager.o: /usr/include/time.h /usr/include/netconfig.h core.h packet.h
+usermanager.o: config.h netmgr.h /usr/local/include/nspr/prthread.h
+usermanager.o: /usr/local/include/nspr/prtpool.h
+usermanager.o: /usr/local/include/nspr/prerror.h
+usermanager.o: /usr/local/include/nspr/prerr.h intercmd.h
+usermanager.o: /usr/local/include/nspr/prnetdb.h
 filemanager.o: filemanager.h /usr/local/include/nspr/prio.h
 filemanager.o: /usr/local/include/nspr/prlong.h
 filemanager.o: /usr/local/include/nspr/prtypes.h
@@ -167,8 +157,8 @@ filemanager.o: /usr/include/sys/_iovec.h /usr/include/machine/param.h
 filemanager.o: /usr/include/netinet/in.h /usr/include/netinet6/in6.h
 filemanager.o: /usr/include/arpa/inet.h /usr/include/netdb.h
 filemanager.o: /usr/include/rpc/types.h /usr/include/sys/time.h
-filemanager.o: /usr/include/time.h /usr/include/netconfig.h core.h
-filemanager.o: usermanager.h packet.h config.h
+filemanager.o: /usr/include/time.h /usr/include/netconfig.h core.h packet.h
+filemanager.o: config.h
 packet.o: packet.h /usr/local/include/nspr/prio.h
 packet.o: /usr/local/include/nspr/prlong.h /usr/local/include/nspr/prtypes.h
 packet.o: /usr/local/include/nspr/prcpucfg.h /usr/include/stddef.h
@@ -185,4 +175,48 @@ packet.o: /usr/include/machine/param.h /usr/include/netinet/in.h
 packet.o: /usr/include/netinet6/in6.h /usr/include/arpa/inet.h
 packet.o: /usr/include/netdb.h /usr/include/rpc/types.h
 packet.o: /usr/include/sys/time.h /usr/include/time.h
-packet.o: /usr/include/netconfig.h
+packet.o: /usr/include/netconfig.h /usr/local/include/nspr/prnetdb.h
+keymgr.o: keymgr.h /usr/local/include/cryptopp/files.h
+keymgr.o: /usr/local/include/cryptopp/cryptlib.h config.h
+keymgr.o: /usr/local/include/cryptopp/stdcpp.h /usr/include/stddef.h
+keymgr.o: /usr/include/sys/cdefs.h /usr/include/sys/_null.h
+keymgr.o: /usr/include/sys/_types.h /usr/include/machine/_types.h
+keymgr.o: /usr/include/assert.h /usr/include/limits.h
+keymgr.o: /usr/include/sys/limits.h /usr/include/machine/_limits.h
+keymgr.o: /usr/include/sys/syslimits.h /usr/local/include/cryptopp/filters.h
+keymgr.o: /usr/local/include/cryptopp/simple.h
+keymgr.o: /usr/local/include/cryptopp/misc.h
+keymgr.o: /usr/local/include/cryptopp/smartptr.h /usr/include/string.h
+keymgr.o: /usr/include/strings.h /usr/local/include/cryptopp/secblock.h
+keymgr.o: /usr/include/stdlib.h /usr/local/include/cryptopp/queue.h
+keymgr.o: /usr/local/include/cryptopp/algparam.h
+keymgr.o: /usr/local/include/cryptopp/argnames.h
+keymgr.o: /usr/local/include/cryptopp/rsa.h
+keymgr.o: /usr/local/include/cryptopp/pubkey.h
+keymgr.o: /usr/local/include/cryptopp/modarith.h
+keymgr.o: /usr/local/include/cryptopp/integer.h
+keymgr.o: /usr/local/include/cryptopp/algebra.h
+keymgr.o: /usr/local/include/cryptopp/eprecomp.h
+keymgr.o: /usr/local/include/cryptopp/fips140.h
+keymgr.o: /usr/local/include/cryptopp/asn.h
+keymgr.o: /usr/local/include/cryptopp/pkcspad.h
+keymgr.o: /usr/local/include/cryptopp/oaep.h
+keymgr.o: /usr/local/include/cryptopp/sha.h
+keymgr.o: /usr/local/include/cryptopp/iterhash.h
+keymgr.o: /usr/local/include/cryptopp/emsa2.h /usr/local/include/nspr/prio.h
+keymgr.o: /usr/local/include/nspr/prlong.h /usr/local/include/nspr/prtypes.h
+keymgr.o: /usr/local/include/nspr/prcpucfg.h
+keymgr.o: /usr/local/include/nspr/obsolete/protypes.h
+keymgr.o: /usr/include/sys/types.h /usr/include/machine/endian.h
+keymgr.o: /usr/include/sys/_pthreadtypes.h /usr/include/sys/select.h
+keymgr.o: /usr/include/sys/_sigset.h /usr/include/sys/_timeval.h
+keymgr.o: /usr/include/sys/timespec.h /usr/local/include/nspr/prtime.h
+keymgr.o: /usr/local/include/nspr/prinrval.h /usr/local/include/nspr/prinet.h
+keymgr.o: /usr/include/sys/socket.h /usr/include/sys/_iovec.h
+keymgr.o: /usr/include/machine/param.h /usr/include/netinet/in.h
+keymgr.o: /usr/include/netinet6/in6.h /usr/include/arpa/inet.h
+keymgr.o: /usr/include/netdb.h /usr/include/rpc/types.h
+keymgr.o: /usr/include/sys/time.h /usr/include/time.h
+keymgr.o: /usr/include/netconfig.h /usr/local/include/cryptopp/base64.h
+keymgr.o: /usr/local/include/cryptopp/basecode.h
+keymgr.o: /usr/local/include/cryptopp/osrng.h

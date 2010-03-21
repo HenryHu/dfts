@@ -1,4 +1,4 @@
-// Last modified: 2010-03-21 00:02:24 henryhu
+// Last modified: 2010-03-21 20:34:48 henryhu
 #ifndef __DTFS_CONFIG_H_
 #define __DTFS_CONFIG_H_
 
@@ -17,6 +17,8 @@ extern int TCP_SEND_TIMEOUT;
 extern int MSG_INIT_THREADS;
 extern int MSG_MAX_THREADS;
 extern int MSG_STACK_SIZE;
+extern int RSA_KEY_LENGTH;
+extern int USERHASH_INIT_SIZE;
 
 enum LogLevel {
 	LOG_DEBUG,
