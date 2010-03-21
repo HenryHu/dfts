@@ -1,23 +1,24 @@
 CXX = g++
-CXXFLAGS = -I/usr/local/include/nspr -g
-LDFLAGS = -L/usr/local/lib -lnspr4
+CXXFLAGS = -I/usr/local/include/nspr -g -I/usr/local/include/cryptopp -pipe -fno-strict-aliasing
+LDFLAGS = -L/usr/local/lib  -lcryptopp -pthread -lnspr4
 SRCS = clientmanager.cpp config.cpp clientservice.cpp logger.cpp clientcommand.cpp netmgr.cpp main.cpp core.cpp usermanager.cpp filemanager.cpp \
-	   packet.cpp
-OBJS = clientmanager.o config.o clientservice.o logger.o clientcommand.o netmgr.o main.o core.o usermanager.o filemanager.o packet.o
+	   packet.cpp keymgr.cpp cfgmgr.cpp user.cpp userhash.cpp
+OBJS = clientmanager.o config.o clientservice.o logger.o clientcommand.o netmgr.o main.o core.o usermanager.o filemanager.o packet.o keymgr.o cfgmgr.o \
+	   user.o userhash.o
 
 all: dfts ctags
 
 dfts: ${OBJS}
-	${CXX} ${CXXFLAGS} ${LDFLAGS} ${OBJS} -o $@
+	${CXX} ${CXXFLAGS} ${OBJS} ${LDFLAGS} -o $@
 
 ctags:
-	exctags -R *.cpp *.h /usr/local/include/nspr/
+	exctags -R *.cpp *.h /usr/local/include/nspr/ /usr/local/include/cryptopp/
 
 clean:
 	rm -f ${OBJS} dfts
 
 depend:
-	makedepend -- ${CXXFLAGS} -- ${SRCS}
+	makedepend -- ${CXXFLAGS} -I/usr/include/c++/4.2/ -- ${SRCS}
 # DO NOT DELETE
 
 clientmanager.o: clientmanager.h /usr/local/include/nspr/prio.h
@@ -38,9 +39,57 @@ clientmanager.o: /usr/include/netinet/in.h /usr/include/netinet6/in6.h
 clientmanager.o: /usr/include/arpa/inet.h /usr/include/netdb.h
 clientmanager.o: /usr/include/rpc/types.h /usr/include/sys/time.h
 clientmanager.o: /usr/include/time.h /usr/include/netconfig.h
-clientmanager.o: /usr/local/include/nspr/prthread.h clientservice.h core.h
-clientmanager.o: usermanager.h packet.h filemanager.h clientcommand.h
-clientmanager.o: config.h threadwrap.h /usr/local/include/nspr/prnetdb.h
+clientmanager.o: /usr/local/include/nspr/prthread.h
+clientmanager.o: /usr/include/c++/4.2/vector
+clientmanager.o: /usr/include/c++/4.2/bits/functexcept.h
+clientmanager.o: /usr/include/c++/4.2/bits/c++config.h
+clientmanager.o: /usr/include/c++/4.2/bits/os_defines.h
+clientmanager.o: /usr/include/c++/4.2/bits/cpu_defines.h
+clientmanager.o: /usr/include/c++/4.2/exception_defines.h
+clientmanager.o: /usr/include/c++/4.2/bits/stl_algobase.h
+clientmanager.o: /usr/include/c++/4.2/cstring /usr/include/c++/4.2/cstddef
+clientmanager.o: /usr/include/string.h /usr/include/strings.h
+clientmanager.o: /usr/include/c++/4.2/climits /usr/include/limits.h
+clientmanager.o: /usr/include/sys/limits.h /usr/include/machine/_limits.h
+clientmanager.o: /usr/include/sys/syslimits.h /usr/include/c++/4.2/cstdlib
+clientmanager.o: /usr/include/stdlib.h /usr/include/c++/4.2/iosfwd
+clientmanager.o: /usr/include/c++/4.2/bits/c++locale.h
+clientmanager.o: /usr/include/c++/4.2/clocale /usr/include/locale.h
+clientmanager.o: /usr/include/c++/4.2/cstdio /usr/include/stdio.h
+clientmanager.o: /usr/include/c++/4.2/cstdarg /usr/include/stdarg.h
+clientmanager.o: /usr/include/c++/4.2/bits/c++io.h
+clientmanager.o: /usr/include/c++/4.2/bits/gthr.h
+clientmanager.o: /usr/include/c++/4.2/bits/gthr-default.h
+clientmanager.o: /usr/include/pthread.h /usr/include/sched.h
+clientmanager.o: /usr/include/unistd.h /usr/include/sys/unistd.h
+clientmanager.o: /usr/include/c++/4.2/cctype /usr/include/ctype.h
+clientmanager.o: /usr/include/_ctype.h /usr/include/runetype.h
+clientmanager.o: /usr/include/c++/4.2/bits/stringfwd.h
+clientmanager.o: /usr/include/c++/4.2/bits/postypes.h
+clientmanager.o: /usr/include/c++/4.2/cwchar /usr/include/c++/4.2/ctime
+clientmanager.o: /usr/include/wchar.h /usr/include/stdint.h
+clientmanager.o: /usr/include/machine/_stdint.h
+clientmanager.o: /usr/include/c++/4.2/bits/stl_pair.h
+clientmanager.o: /usr/include/c++/4.2/bits/cpp_type_traits.h
+clientmanager.o: /usr/include/c++/4.2/ext/type_traits.h
+clientmanager.o: /usr/include/c++/4.2/utility
+clientmanager.o: /usr/include/c++/4.2/bits/stl_relops.h
+clientmanager.o: /usr/include/c++/4.2/bits/stl_iterator_base_types.h
+clientmanager.o: /usr/include/c++/4.2/bits/stl_iterator_base_funcs.h
+clientmanager.o: /usr/include/c++/4.2/bits/concept_check.h
+clientmanager.o: /usr/include/c++/4.2/bits/stl_iterator.h
+clientmanager.o: /usr/include/c++/4.2/debug/debug.h
+clientmanager.o: /usr/include/c++/4.2/bits/allocator.h
+clientmanager.o: /usr/include/c++/4.2/bits/c++allocator.h
+clientmanager.o: /usr/include/c++/4.2/ext/new_allocator.h
+clientmanager.o: /usr/include/c++/4.2/new /usr/include/c++/4.2/exception
+clientmanager.o: /usr/include/c++/4.2/bits/stl_construct.h
+clientmanager.o: /usr/include/c++/4.2/bits/stl_uninitialized.h
+clientmanager.o: /usr/include/c++/4.2/bits/stl_vector.h
+clientmanager.o: /usr/include/c++/4.2/bits/stl_bvector.h
+clientmanager.o: /usr/include/c++/4.2/bits/vector.tcc clientservice.h core.h
+clientmanager.o: clientcommand.h config.h threadwrap.h
+clientmanager.o: /usr/local/include/nspr/prnetdb.h
 config.o: config.h
 clientservice.o: clientservice.h /usr/local/include/nspr/prio.h
 clientservice.o: /usr/local/include/nspr/prlong.h
@@ -60,9 +109,9 @@ clientservice.o: /usr/include/netinet/in.h /usr/include/netinet6/in6.h
 clientservice.o: /usr/include/arpa/inet.h /usr/include/netdb.h
 clientservice.o: /usr/include/rpc/types.h /usr/include/sys/time.h
 clientservice.o: /usr/include/time.h /usr/include/netconfig.h
-clientservice.o: /usr/local/include/nspr/prthread.h core.h usermanager.h
-clientservice.o: packet.h filemanager.h clientcommand.h config.h
-clientservice.o: /usr/include/stdio.h threadwrap.h /usr/include/strings.h
+clientservice.o: /usr/local/include/nspr/prthread.h core.h clientcommand.h
+clientservice.o: config.h /usr/include/stdio.h threadwrap.h
+clientservice.o: /usr/include/strings.h usermanager.h packet.h
 logger.o: config.h /usr/include/stdarg.h /usr/include/sys/cdefs.h
 logger.o: /usr/include/sys/_types.h /usr/include/machine/_types.h
 logger.o: /usr/include/stdio.h /usr/include/sys/_null.h
@@ -92,10 +141,10 @@ netmgr.o: /usr/include/netinet6/in6.h /usr/include/arpa/inet.h
 netmgr.o: /usr/include/netdb.h /usr/include/rpc/types.h
 netmgr.o: /usr/include/sys/time.h /usr/include/time.h
 netmgr.o: /usr/include/netconfig.h /usr/local/include/nspr/prthread.h core.h
-netmgr.o: usermanager.h packet.h filemanager.h
 netmgr.o: /usr/local/include/nspr/prtpool.h /usr/local/include/nspr/prerror.h
-netmgr.o: /usr/local/include/nspr/prerr.h threadwrap.h config.h
-netmgr.o: /usr/local/include/nspr/prnetdb.h intercmd.h
+netmgr.o: /usr/local/include/nspr/prerr.h packet.h threadwrap.h config.h
+netmgr.o: /usr/local/include/nspr/prnetdb.h intercmd.h usermanager.h
+netmgr.o: filemanager.h
 main.o: clientmanager.h /usr/local/include/nspr/prio.h
 main.o: /usr/local/include/nspr/prlong.h /usr/local/include/nspr/prtypes.h
 main.o: /usr/local/include/nspr/prcpucfg.h /usr/include/stddef.h
@@ -112,26 +161,52 @@ main.o: /usr/include/netinet/in.h /usr/include/netinet6/in6.h
 main.o: /usr/include/arpa/inet.h /usr/include/netdb.h
 main.o: /usr/include/rpc/types.h /usr/include/sys/time.h /usr/include/time.h
 main.o: /usr/include/netconfig.h /usr/local/include/nspr/prthread.h
-main.o: clientservice.h core.h usermanager.h packet.h filemanager.h
-main.o: clientcommand.h netmgr.h /usr/local/include/nspr/prtpool.h
-main.o: /usr/local/include/nspr/prerror.h /usr/local/include/nspr/prerr.h
-main.o: config.h /usr/local/include/nspr/prnetdb.h
-core.o: core.h usermanager.h /usr/local/include/nspr/prio.h
-core.o: /usr/local/include/nspr/prlong.h /usr/local/include/nspr/prtypes.h
-core.o: /usr/local/include/nspr/prcpucfg.h /usr/include/stddef.h
-core.o: /usr/include/sys/cdefs.h /usr/include/sys/_null.h
-core.o: /usr/include/sys/_types.h /usr/include/machine/_types.h
-core.o: /usr/local/include/nspr/obsolete/protypes.h /usr/include/sys/types.h
-core.o: /usr/include/machine/endian.h /usr/include/sys/_pthreadtypes.h
-core.o: /usr/include/sys/select.h /usr/include/sys/_sigset.h
-core.o: /usr/include/sys/_timeval.h /usr/include/sys/timespec.h
-core.o: /usr/local/include/nspr/prtime.h /usr/local/include/nspr/prinrval.h
-core.o: /usr/local/include/nspr/prinet.h /usr/include/sys/socket.h
-core.o: /usr/include/sys/_iovec.h /usr/include/machine/param.h
-core.o: /usr/include/netinet/in.h /usr/include/netinet6/in6.h
-core.o: /usr/include/arpa/inet.h /usr/include/netdb.h
-core.o: /usr/include/rpc/types.h /usr/include/sys/time.h /usr/include/time.h
-core.o: /usr/include/netconfig.h packet.h filemanager.h
+main.o: /usr/include/c++/4.2/vector /usr/include/c++/4.2/bits/functexcept.h
+main.o: /usr/include/c++/4.2/bits/c++config.h
+main.o: /usr/include/c++/4.2/bits/os_defines.h
+main.o: /usr/include/c++/4.2/bits/cpu_defines.h
+main.o: /usr/include/c++/4.2/exception_defines.h
+main.o: /usr/include/c++/4.2/bits/stl_algobase.h /usr/include/c++/4.2/cstring
+main.o: /usr/include/c++/4.2/cstddef /usr/include/string.h
+main.o: /usr/include/strings.h /usr/include/c++/4.2/climits
+main.o: /usr/include/limits.h /usr/include/sys/limits.h
+main.o: /usr/include/machine/_limits.h /usr/include/sys/syslimits.h
+main.o: /usr/include/c++/4.2/cstdlib /usr/include/stdlib.h
+main.o: /usr/include/c++/4.2/iosfwd /usr/include/c++/4.2/bits/c++locale.h
+main.o: /usr/include/c++/4.2/clocale /usr/include/locale.h
+main.o: /usr/include/c++/4.2/cstdio /usr/include/stdio.h
+main.o: /usr/include/c++/4.2/cstdarg /usr/include/stdarg.h
+main.o: /usr/include/c++/4.2/bits/c++io.h /usr/include/c++/4.2/bits/gthr.h
+main.o: /usr/include/c++/4.2/bits/gthr-default.h /usr/include/pthread.h
+main.o: /usr/include/sched.h /usr/include/unistd.h /usr/include/sys/unistd.h
+main.o: /usr/include/c++/4.2/cctype /usr/include/ctype.h
+main.o: /usr/include/_ctype.h /usr/include/runetype.h
+main.o: /usr/include/c++/4.2/bits/stringfwd.h
+main.o: /usr/include/c++/4.2/bits/postypes.h /usr/include/c++/4.2/cwchar
+main.o: /usr/include/c++/4.2/ctime /usr/include/wchar.h /usr/include/stdint.h
+main.o: /usr/include/machine/_stdint.h /usr/include/c++/4.2/bits/stl_pair.h
+main.o: /usr/include/c++/4.2/bits/cpp_type_traits.h
+main.o: /usr/include/c++/4.2/ext/type_traits.h /usr/include/c++/4.2/utility
+main.o: /usr/include/c++/4.2/bits/stl_relops.h
+main.o: /usr/include/c++/4.2/bits/stl_iterator_base_types.h
+main.o: /usr/include/c++/4.2/bits/stl_iterator_base_funcs.h
+main.o: /usr/include/c++/4.2/bits/concept_check.h
+main.o: /usr/include/c++/4.2/bits/stl_iterator.h
+main.o: /usr/include/c++/4.2/debug/debug.h
+main.o: /usr/include/c++/4.2/bits/allocator.h
+main.o: /usr/include/c++/4.2/bits/c++allocator.h
+main.o: /usr/include/c++/4.2/ext/new_allocator.h /usr/include/c++/4.2/new
+main.o: /usr/include/c++/4.2/exception
+main.o: /usr/include/c++/4.2/bits/stl_construct.h
+main.o: /usr/include/c++/4.2/bits/stl_uninitialized.h
+main.o: /usr/include/c++/4.2/bits/stl_vector.h
+main.o: /usr/include/c++/4.2/bits/stl_bvector.h
+main.o: /usr/include/c++/4.2/bits/vector.tcc clientservice.h core.h
+main.o: clientcommand.h usermanager.h packet.h netmgr.h
+main.o: /usr/local/include/nspr/prtpool.h /usr/local/include/nspr/prerror.h
+main.o: /usr/local/include/nspr/prerr.h config.h
+main.o: /usr/local/include/nspr/prnetdb.h
+core.o: core.h
 usermanager.o: usermanager.h /usr/local/include/nspr/prio.h
 usermanager.o: /usr/local/include/nspr/prlong.h
 usermanager.o: /usr/local/include/nspr/prtypes.h
@@ -149,8 +224,12 @@ usermanager.o: /usr/include/sys/_iovec.h /usr/include/machine/param.h
 usermanager.o: /usr/include/netinet/in.h /usr/include/netinet6/in6.h
 usermanager.o: /usr/include/arpa/inet.h /usr/include/netdb.h
 usermanager.o: /usr/include/rpc/types.h /usr/include/sys/time.h
-usermanager.o: /usr/include/time.h /usr/include/netconfig.h core.h
-usermanager.o: filemanager.h packet.h config.h
+usermanager.o: /usr/include/time.h /usr/include/netconfig.h core.h packet.h
+usermanager.o: config.h netmgr.h /usr/local/include/nspr/prthread.h
+usermanager.o: /usr/local/include/nspr/prtpool.h
+usermanager.o: /usr/local/include/nspr/prerror.h
+usermanager.o: /usr/local/include/nspr/prerr.h intercmd.h
+usermanager.o: /usr/local/include/nspr/prnetdb.h
 filemanager.o: filemanager.h /usr/local/include/nspr/prio.h
 filemanager.o: /usr/local/include/nspr/prlong.h
 filemanager.o: /usr/local/include/nspr/prtypes.h
@@ -168,8 +247,8 @@ filemanager.o: /usr/include/sys/_iovec.h /usr/include/machine/param.h
 filemanager.o: /usr/include/netinet/in.h /usr/include/netinet6/in6.h
 filemanager.o: /usr/include/arpa/inet.h /usr/include/netdb.h
 filemanager.o: /usr/include/rpc/types.h /usr/include/sys/time.h
-filemanager.o: /usr/include/time.h /usr/include/netconfig.h core.h
-filemanager.o: usermanager.h packet.h config.h
+filemanager.o: /usr/include/time.h /usr/include/netconfig.h core.h packet.h
+filemanager.o: config.h
 packet.o: packet.h /usr/local/include/nspr/prio.h
 packet.o: /usr/local/include/nspr/prlong.h /usr/local/include/nspr/prtypes.h
 packet.o: /usr/local/include/nspr/prcpucfg.h /usr/include/stddef.h
@@ -186,4 +265,125 @@ packet.o: /usr/include/machine/param.h /usr/include/netinet/in.h
 packet.o: /usr/include/netinet6/in6.h /usr/include/arpa/inet.h
 packet.o: /usr/include/netdb.h /usr/include/rpc/types.h
 packet.o: /usr/include/sys/time.h /usr/include/time.h
-packet.o: /usr/include/netconfig.h
+packet.o: /usr/include/netconfig.h /usr/local/include/nspr/prnetdb.h
+keymgr.o: keymgr.h /usr/local/include/cryptopp/files.h
+keymgr.o: /usr/local/include/cryptopp/cryptlib.h config.h
+keymgr.o: /usr/local/include/cryptopp/stdcpp.h /usr/include/stddef.h
+keymgr.o: /usr/include/sys/cdefs.h /usr/include/sys/_null.h
+keymgr.o: /usr/include/sys/_types.h /usr/include/machine/_types.h
+keymgr.o: /usr/include/assert.h /usr/include/limits.h
+keymgr.o: /usr/include/sys/limits.h /usr/include/machine/_limits.h
+keymgr.o: /usr/include/sys/syslimits.h /usr/include/c++/4.2/memory
+keymgr.o: /usr/include/c++/4.2/bits/stl_algobase.h
+keymgr.o: /usr/include/c++/4.2/bits/c++config.h
+keymgr.o: /usr/include/c++/4.2/bits/os_defines.h
+keymgr.o: /usr/include/c++/4.2/bits/cpu_defines.h
+keymgr.o: /usr/include/c++/4.2/cstring /usr/include/c++/4.2/cstddef
+keymgr.o: /usr/include/string.h /usr/include/strings.h
+keymgr.o: /usr/include/c++/4.2/climits /usr/include/c++/4.2/cstdlib
+keymgr.o: /usr/include/stdlib.h /usr/include/c++/4.2/iosfwd
+keymgr.o: /usr/include/c++/4.2/bits/c++locale.h /usr/include/c++/4.2/clocale
+keymgr.o: /usr/include/locale.h /usr/include/c++/4.2/cstdio
+keymgr.o: /usr/include/stdio.h /usr/include/c++/4.2/cstdarg
+keymgr.o: /usr/include/stdarg.h /usr/include/c++/4.2/bits/c++io.h
+keymgr.o: /usr/include/c++/4.2/bits/gthr.h
+keymgr.o: /usr/include/c++/4.2/bits/gthr-default.h /usr/include/pthread.h
+keymgr.o: /usr/include/sys/_pthreadtypes.h /usr/include/sys/_sigset.h
+keymgr.o: /usr/include/sched.h /usr/include/time.h
+keymgr.o: /usr/include/sys/timespec.h /usr/include/unistd.h
+keymgr.o: /usr/include/sys/types.h /usr/include/machine/endian.h
+keymgr.o: /usr/include/sys/select.h /usr/include/sys/_timeval.h
+keymgr.o: /usr/include/sys/unistd.h /usr/include/c++/4.2/cctype
+keymgr.o: /usr/include/ctype.h /usr/include/_ctype.h /usr/include/runetype.h
+keymgr.o: /usr/include/c++/4.2/bits/stringfwd.h
+keymgr.o: /usr/include/c++/4.2/bits/postypes.h /usr/include/c++/4.2/cwchar
+keymgr.o: /usr/include/c++/4.2/ctime /usr/include/wchar.h
+keymgr.o: /usr/include/stdint.h /usr/include/machine/_stdint.h
+keymgr.o: /usr/include/c++/4.2/bits/functexcept.h
+keymgr.o: /usr/include/c++/4.2/exception_defines.h
+keymgr.o: /usr/include/c++/4.2/bits/stl_pair.h
+keymgr.o: /usr/include/c++/4.2/bits/cpp_type_traits.h
+keymgr.o: /usr/include/c++/4.2/ext/type_traits.h /usr/include/c++/4.2/utility
+keymgr.o: /usr/include/c++/4.2/bits/stl_relops.h
+keymgr.o: /usr/include/c++/4.2/bits/stl_iterator_base_types.h
+keymgr.o: /usr/include/c++/4.2/bits/stl_iterator_base_funcs.h
+keymgr.o: /usr/include/c++/4.2/bits/concept_check.h
+keymgr.o: /usr/include/c++/4.2/bits/stl_iterator.h
+keymgr.o: /usr/include/c++/4.2/debug/debug.h
+keymgr.o: /usr/include/c++/4.2/bits/allocator.h
+keymgr.o: /usr/include/c++/4.2/bits/c++allocator.h
+keymgr.o: /usr/include/c++/4.2/ext/new_allocator.h /usr/include/c++/4.2/new
+keymgr.o: /usr/include/c++/4.2/exception
+keymgr.o: /usr/include/c++/4.2/bits/stl_construct.h
+keymgr.o: /usr/include/c++/4.2/bits/stl_uninitialized.h
+keymgr.o: /usr/include/c++/4.2/bits/stl_raw_storage_iter.h
+keymgr.o: /usr/include/c++/4.2/limits /usr/include/c++/4.2/string
+keymgr.o: /usr/include/c++/4.2/bits/char_traits.h
+keymgr.o: /usr/include/c++/4.2/bits/ostream_insert.h
+keymgr.o: /usr/include/c++/4.2/bits/stl_function.h
+keymgr.o: /usr/include/c++/4.2/bits/basic_string.h
+keymgr.o: /usr/include/c++/4.2/ext/atomicity.h
+keymgr.o: /usr/include/c++/4.2/bits/atomic_word.h
+keymgr.o: /usr/include/c++/4.2/algorithm /usr/include/c++/4.2/bits/stl_algo.h
+keymgr.o: /usr/include/c++/4.2/bits/stl_heap.h
+keymgr.o: /usr/include/c++/4.2/bits/stl_tempbuf.h
+keymgr.o: /usr/include/c++/4.2/bits/basic_string.tcc
+keymgr.o: /usr/include/c++/4.2/typeinfo /usr/local/include/cryptopp/filters.h
+keymgr.o: /usr/local/include/cryptopp/simple.h
+keymgr.o: /usr/local/include/cryptopp/misc.h
+keymgr.o: /usr/local/include/cryptopp/smartptr.h
+keymgr.o: /usr/local/include/cryptopp/secblock.h
+keymgr.o: /usr/local/include/cryptopp/queue.h
+keymgr.o: /usr/local/include/cryptopp/algparam.h /usr/include/c++/4.2/deque
+keymgr.o: /usr/include/c++/4.2/bits/stl_deque.h
+keymgr.o: /usr/include/c++/4.2/bits/deque.tcc
+keymgr.o: /usr/local/include/cryptopp/argnames.h
+keymgr.o: /usr/include/c++/4.2/iostream /usr/include/c++/4.2/ostream
+keymgr.o: /usr/include/c++/4.2/ios /usr/include/c++/4.2/bits/localefwd.h
+keymgr.o: /usr/include/c++/4.2/bits/ios_base.h
+keymgr.o: /usr/include/c++/4.2/bits/locale_classes.h
+keymgr.o: /usr/include/c++/4.2/streambuf
+keymgr.o: /usr/include/c++/4.2/bits/streambuf.tcc
+keymgr.o: /usr/include/c++/4.2/bits/basic_ios.h
+keymgr.o: /usr/include/c++/4.2/bits/streambuf_iterator.h
+keymgr.o: /usr/include/c++/4.2/bits/locale_facets.h
+keymgr.o: /usr/include/c++/4.2/cwctype /usr/include/wctype.h
+keymgr.o: /usr/include/c++/4.2/bits/ctype_base.h
+keymgr.o: /usr/include/c++/4.2/bits/ctype_inline.h
+keymgr.o: /usr/include/c++/4.2/bits/codecvt.h
+keymgr.o: /usr/include/c++/4.2/bits/time_members.h
+keymgr.o: /usr/include/c++/4.2/bits/messages_members.h
+keymgr.o: /usr/include/c++/4.2/bits/basic_ios.tcc
+keymgr.o: /usr/include/c++/4.2/bits/ostream.tcc /usr/include/c++/4.2/locale
+keymgr.o: /usr/include/c++/4.2/bits/locale_facets.tcc
+keymgr.o: /usr/include/c++/4.2/istream /usr/include/c++/4.2/bits/istream.tcc
+keymgr.o: /usr/include/c++/4.2/fstream /usr/include/c++/4.2/bits/basic_file.h
+keymgr.o: /usr/include/c++/4.2/bits/fstream.tcc
+keymgr.o: /usr/local/include/cryptopp/rsa.h
+keymgr.o: /usr/local/include/cryptopp/pubkey.h
+keymgr.o: /usr/local/include/cryptopp/modarith.h
+keymgr.o: /usr/local/include/cryptopp/integer.h
+keymgr.o: /usr/local/include/cryptopp/algebra.h
+keymgr.o: /usr/local/include/cryptopp/eprecomp.h /usr/include/c++/4.2/vector
+keymgr.o: /usr/include/c++/4.2/bits/stl_vector.h
+keymgr.o: /usr/include/c++/4.2/bits/stl_bvector.h
+keymgr.o: /usr/include/c++/4.2/bits/vector.tcc
+keymgr.o: /usr/local/include/cryptopp/fips140.h
+keymgr.o: /usr/local/include/cryptopp/asn.h
+keymgr.o: /usr/local/include/cryptopp/pkcspad.h
+keymgr.o: /usr/local/include/cryptopp/oaep.h
+keymgr.o: /usr/local/include/cryptopp/sha.h
+keymgr.o: /usr/local/include/cryptopp/iterhash.h
+keymgr.o: /usr/local/include/cryptopp/emsa2.h /usr/local/include/nspr/prio.h
+keymgr.o: /usr/local/include/nspr/prlong.h /usr/local/include/nspr/prtypes.h
+keymgr.o: /usr/local/include/nspr/prcpucfg.h
+keymgr.o: /usr/local/include/nspr/obsolete/protypes.h
+keymgr.o: /usr/local/include/nspr/prtime.h /usr/local/include/nspr/prinrval.h
+keymgr.o: /usr/local/include/nspr/prinet.h /usr/include/sys/socket.h
+keymgr.o: /usr/include/sys/_iovec.h /usr/include/machine/param.h
+keymgr.o: /usr/include/netinet/in.h /usr/include/netinet6/in6.h
+keymgr.o: /usr/include/arpa/inet.h /usr/include/netdb.h
+keymgr.o: /usr/include/rpc/types.h /usr/include/sys/time.h
+keymgr.o: /usr/include/netconfig.h /usr/local/include/cryptopp/base64.h
+keymgr.o: /usr/local/include/cryptopp/basecode.h
+keymgr.o: /usr/local/include/cryptopp/osrng.h
