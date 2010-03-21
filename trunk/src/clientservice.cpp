@@ -7,6 +7,7 @@
 #include "threadwrap.h"
 #include "clientcommand.h"
 #include <strings.h>
+#include "usermanager.h"
 
 ClientService::ClientService(PRFileDesc *csock, 
 		const PRNetAddr &servaddr, const PRNetAddr &cliaddr,
@@ -59,6 +60,7 @@ void ClientService::run()
 				findEOL();
 				// XXX call userManager to find neighbour
 				//
+				core->getUserManager()->findNeighbour();
 				break;
 			case CLI_CMD_GET_NEIGHBOUR:
 				LogMsg(LOG_DEBUG, "get neighbour.\n");
