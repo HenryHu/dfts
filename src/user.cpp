@@ -1,4 +1,4 @@
-// Last Modified: 2010-03-21 20:26:07 henryhu
+// Last Modified: 2010-03-21 22:31:57 henryhu
 
 #include "user.h"
 #include <prtypes.h>
@@ -36,4 +36,14 @@ void User::setIP(PRUint32 i)
 void User::setName(const string& n)
 {
 	name = n;
+}
+
+void User::setIter(std::list<User *>::iterator i)
+{
+	it = i;
+}
+
+PRUint32 User::getIP()
+{
+	return ip;
 }

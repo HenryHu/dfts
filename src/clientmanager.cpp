@@ -1,4 +1,4 @@
-// Last modified: 2010-02-26 22:01:00 henryhu
+// Last modified: 2010-03-21 22:43:20 henryhu
 #include "clientmanager.h"
 #include "config.h"
 #include <prio.h>
@@ -17,6 +17,11 @@ void ClientManager::run()
 		ShowPRError();
 		return ;
 	}
+
+	PRSocketOptionData data;
+	data.option = PR_SockOpt_Reuseaddr;
+	data.value.reuse_addr = PR_TRUE;
+	PR_SetSocketOption(servsock, &data);
 
 	PRStatus ret = PR_Bind(servsock, &addr);
 	if (ret != PR_SUCCESS)

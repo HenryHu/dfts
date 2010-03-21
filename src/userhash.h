@@ -1,8 +1,9 @@
-// Last Modified: 2010-03-21 20:38:54 henryhu
+// Last Modified: 2010-03-21 23:09:12 henryhu
 #ifndef __DFTS_USERHASH_H_
 #define __DFTS_USERHASH_H_
 #include "user.h"
 #include <string>
+#include <prlock.h>
 
 class UserHash {
 private:
@@ -19,6 +20,7 @@ private:
 	};
 	UserHashNode **list;
 	int size;
+	PRLock *lock;
 
 public:
 	User *findByKey(const std::string& key);
