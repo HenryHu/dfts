@@ -1,4 +1,4 @@
-// Last modified: 2010-03-21 01:02:42 henryhu
+// Last modified: 2010-05-19 19:48:27 henryhu
 #ifndef __DTFS_MSGRECEIVER_H_
 #define __DTFS_MSGRECEIVER_H_
 #include <prio.h>
@@ -6,6 +6,8 @@
 #include "core.h"
 #include <prtpool.h>
 #include "packet.h"
+#include "packethook.h"
+#include <map>
 
 class NetMgr {
 private:
@@ -17,6 +19,7 @@ private:
 	int udpPort;
 	int tcpPort;
 	Core *core;
+	std::map<PRInt16, PacketHook *> hookList;
 	class TCPReceiver {
 	private:
 		PRFileDesc *conn;
@@ -46,6 +49,9 @@ public:
 	NetMgr(const PRNetAddr& a, int uport, int tport, Core *c);
 	PRStatus sendMsg(Packet *pkt, PRInt16 cmd);
 	PRThread *getThread();
+	PacketHook *findHook(PRInt16 cmd);
+	void addHook(PRInt16 cmd, PacketHookFunc func);
+	void removeHook(PRInt16 cmd, PacketHookFunc func);
 
 };
 

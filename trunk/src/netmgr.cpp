@@ -1,4 +1,4 @@
-// Last modified: 2010-03-21 02:04:41 henryhu
+// Last modified: 2010-05-27 02:08:10 henryhu
 #include "netmgr.h"
 #include "threadwrap.h"
 #include "config.h"
@@ -10,6 +10,8 @@
 #include "packet.h"
 #include "usermanager.h"
 #include "filemanager.h"
+#include <iostream>
+using namespace std;
 
 NetMgr::NetMgr(const PRNetAddr &a, int uport, int tport, Core *c)
 {
@@ -225,9 +227,30 @@ void NetMgr::TCPSender::run()
 void NetMgr::parsePacket(Packet *pkt)
 {
 	LogMsg(LOG_DEBUG, "lossable packet received. len: %d\n", pkt->getLen());
-	if (pkt->getLen() < 2)
+	if (pkt->getLen() < 4)
 		return;
-	PRInt16 cmd = PR_ntohs(*((PRInt16 *)(pkt->getData())));
+	PRInt16 cmd = pkt->fetchWord();
+	PRInt16 port = pkt->fetchWord();
+	if ((cmd == -1) || (port == -1))
+		return;
+
+	pkt->setRPort(port);
+	bool breaked = false;
+	PacketHook *hooks = findHook(cmd);
+	while (hooks != NULL)
+	{
+		int ret = hooks->hook(pkt);
+		if (ret == HOOK_ACT_BREAK)
+		{
+			breaked = true;
+			break;
+		}
+		hooks = hooks->next;
+	}
+
+	if (breaked)
+		return;
+
 	switch (cmd)
 	{
 		// They should take care of the packet
@@ -247,8 +270,20 @@ void NetMgr::parsePacket(Packet *pkt)
 			LogMsg(LOG_DEBUG, "someone is finding file by name\n");
 			core->getFileManager()->parseFindFileByName(pkt);
 			break;
+		case INT_CMD_FIND_FILE_BY_NAME_REPLY:
+			LogMsg(LOG_DEBUG, "got find file by name reply\n");
+			core->getFileManager()->parseFindFileByNameReply(pkt);
+			break;
 		case INT_CMD_FIND_FILE_BY_ID:
-			core->getFileManager()->parseFindBlockByID(pkt);
+//			core->getFileManager()->parseFindBlockByID(pkt);
+			break;
+		case INT_CMD_GET_FILE_INFO:
+			LogMsg(LOG_DEBUG, "someone need file info\n");
+			core->getFileManager()->parseGetFileInformation(pkt);
+			break;
+		case INT_CMD_GET_FILE_INFO_REPLY:
+			LogMsg(LOG_DEBUG, "got file info\n");
+			core->getFileManager()->parseGetFileInfoReply(pkt);
 			break;
 		default:
 			LogMsg(LOG_DEBUG, "unknown message: %d\n", cmd);
@@ -272,19 +307,60 @@ PRStatus NetMgr::sendMsg(
 		// Send through UDP
 		if (udpSock != NULL)
 		{
-			PRInt32 ret = PR_SendTo(udpSock, pkt->getData(), pkt->getLen(), 0, pkt->getPAddr(), 
-					UDP_SEND_TIMEOUT);
+			PRInt32 ret = PR_SendTo(udpSock, pkt->getData(), 
+					pkt->getLen(), 0, pkt->getPAddr(), UDP_SEND_TIMEOUT);
 			// Shall we release data?
 			int len = pkt->getLen();
-			delete pkt;
 			if (ret == len)
+			{
+				delete pkt;
 				return PR_SUCCESS;
+			}
 			else
 			{
-				LogMsg(LOG_DEBUG, "failed to send UDP packet.\n");
+				char saddr[100];
+				PR_NetAddrToString(pkt->getPAddr(), saddr, sizeof(saddr));
+				LogMsg(LOG_DEBUG, "failed to send UDP packet addr: "
+						"%s port: %d.\n", saddr, 
+						PR_ntohs(pkt->getPAddr()->inet.port));
 				ShowPRError();
+				delete pkt;
 				return PR_FAILURE;
 			}
+		}
+	}
+}
+
+PacketHook * NetMgr::findHook(PRInt16 cmd)
+{
+	return hookList[cmd];
+}
+
+void NetMgr::addHook(PRInt16 cmd, PacketHookFunc func)
+{
+	PacketHook *hook = findHook(cmd);
+	PacketHook *newhook = new PacketHook;
+	newhook->hook = func;
+	newhook->next = hook;
+	hookList[cmd] = newhook;
+}
+
+void NetMgr::removeHook(PRInt16 cmd, PacketHookFunc func)
+{
+	PacketHook *hook = findHook(cmd);
+	PacketHook *ll = NULL;
+	while(hook != NULL)
+	{
+		if (hook->hook == func)
+		{
+			if (ll == NULL)
+				hookList[cmd] = hook->next;
+			else
+			{
+				ll->next = hook->next;
+			}
+			delete hook;
+			return;
 		}
 	}
 }

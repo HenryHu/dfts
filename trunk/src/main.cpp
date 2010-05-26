@@ -6,6 +6,10 @@
 #include <prio.h>
 #include <prnetdb.h>
 #include "keymgr.h"
+#include "datahasher.h"
+#include <iostream>
+#include "filemanager.h"
+using namespace std;
 
 int main()
 {
@@ -22,11 +26,20 @@ int main()
 	ClientManager cm(addr, core);
 	cm.start();
 	NetMgr mr(addr, INTERCONNECT_PORT, INTERCONNECT_PORT, core);
+	FileManager fm(core);
+	fm.addLocalDir("/tmp/plugtmp-1");
 	core->setNetMgr(&mr);
 	core->setUserMgr(um);
 	core->setKeyMgr(km);
 	core->setCfgMgr(cfgm);
+	core->setFileMgr(&fm);
 	mr.start();
+
+	PR_StringToNetAddr("192.168.1.109", &addr);
+	addr.inet.port = PR_htons(INTERCONNECT_PORT);
+	fm.sendSearch(addr, 12345, ".*");
+	fm.sendGetFileInfo(addr, "plugin-crossdomain.xml", DataHash("92498502AB185CF12C0C8BC8CA7AE14964FC97BE"), 145);
+
 	PR_JoinThread(cm.getThread());
 	PR_JoinThread(mr.getThread());
 	return 0;
