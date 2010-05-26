@@ -1,6 +1,7 @@
-// Last modified: 2010-03-21 20:34:48 henryhu
+// Last modified: 2010-05-27 01:26:44 henryhu
 #ifndef __DTFS_CONFIG_H_
 #define __DTFS_CONFIG_H_
+#include <errno.h>
 
 extern int CLIENT_MANAGER_PORT;
 extern int INTERCONNECT_PORT;
@@ -19,8 +20,10 @@ extern int MSG_MAX_THREADS;
 extern int MSG_STACK_SIZE;
 extern int RSA_KEY_LENGTH;
 extern int USERHASH_INIT_SIZE;
+extern int BLOCK_SIZE;
 
 enum LogLevel {
+	LOG_EXTEND,
 	LOG_DEBUG,
 	LOG_INFO,
 	LOG_WARN,

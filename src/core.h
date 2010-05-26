@@ -1,4 +1,4 @@
-// Last modified: 2010-03-21 15:33:45 henryhu
+// Last modified: 2010-05-27 01:30:32 henryhu
 //
 #ifndef __DFTS_CORE_H_
 #define __DFTS_CORE_H_
@@ -26,6 +26,7 @@ public:
 	void setUserMgr(UserManager *um) { userManager = um; }
 	void setKeyMgr(KeyMgr *km) { keyMgr = km; }
 	void setCfgMgr(CfgMgr *cm) { cfgMgr = cm; }
+	void setFileMgr(FileManager *fm) { fileManager = fm; }
 };
 
 #endif // __DFTS_SERVER_H_

@@ -7,6 +7,9 @@
 void LogMsg(LogLevel level, char *msg, ...)
 {
 	switch (level) {
+		case LOG_EXTEND:
+			fprintf(stderr, "[extend] ");
+			break;
 		case LOG_INFO:
 			fprintf(stderr, "[info] ");
 			break;

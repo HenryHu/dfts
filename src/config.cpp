@@ -1,4 +1,4 @@
-// Last modified: 2010-03-21 20:38:06 henryhu
+// Last modified: 2010-05-26 18:36:18 henryhu
 #include "config.h"
 
 
@@ -19,3 +19,4 @@ int MSG_MAX_THREADS = 200;
 int MSG_STACK_SIZE = 4096;
 int RSA_KEY_LENGTH = 1024;
 int USERHASH_INIT_SIZE = 5000;
+int BLOCK_SIZE = 4096;

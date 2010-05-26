@@ -1,4 +1,4 @@
-// Last modified: 2010-03-21 15:59:52 henryhu
+// Last modified: 2010-05-27 02:25:27 henryhu
 #include "packet.h"
 #include <prnetdb.h>
 #include <string>
@@ -7,14 +7,32 @@ using namespace std;
 Packet::Packet(const PRNetAddr& a, char *d, int l)
 	: data(d), len(l), addr(a), ptr(d) {}
 
+// Pakcet with type
 Packet::Packet(const PRNetAddr& a, PRInt16 type, int dlen)
 {
 	addr = a;
 	data = new char[dlen];
 	ptr = data + 2;
 	buflen = dlen;
-	len = 2;
+	len = 4;
 	*(PRInt16 *)data = PR_htons(type);
+	*(PRInt16 *)ptr = PR_htons(0);
+	ptr += 2;
+	rPort = 0;
+}
+
+// Packet with type and return port
+Packet::Packet(const PRNetAddr& a, PRInt16 type, int dlen, PRInt16 rPt)
+{
+	addr = a;
+	rPort = rPt;
+	data = new char[dlen];
+	ptr = data + 2;
+	buflen = dlen;
+	len = 4;
+	*(PRInt16 *)data = PR_htons(type);
+	*(PRInt16 *)ptr = PR_htons(rPt);
+	ptr += 2;
 }
 
 char *Packet::getData()
@@ -35,6 +53,13 @@ PRNetAddr *Packet::getPAddr()
 const PRNetAddr &Packet::getAddr()
 {
 	return addr;
+}
+
+const PRNetAddr Packet::getRAddr()
+{
+	PRNetAddr raddr = addr;
+	raddr.inet.port = PR_htons(rPort);
+	return raddr;
 }
 
 void Packet::moreSpace(int space)
@@ -67,6 +92,14 @@ void Packet::appendWord(PRInt16 i)
 	*(PRInt16*)ptr = PR_htons(i);
 	ptr += 2;
 	len += 2;
+}
+
+void Packet::appendInt(PRInt32 i)
+{
+	moreSpace(4);
+	*(PRInt32 *)ptr = PR_htonl(i);
+	ptr += 4;
+	len += 4;
 }
 
 PRInt16 Packet::fetchWord()
@@ -104,5 +137,79 @@ PRInt32 Packet::fetchInt()
 	ptr += 4;
 	len -= 4;
 	return ret;
+}
+
+PRInt8 Packet::fetchByte()
+{
+	if (len < 1)
+		return -1;
+
+	PRInt8 ret = *ptr;
+	ptr+=1;
+	len-=1;
+	return ret;
+}
+
+void Packet::appendByte(PRInt8 i)
+{
+	moreSpace(1);
+	*ptr = i;
+	ptr += 1;
+	len += 1;
+}
+
+PRInt16 Packet::getRPort()
+{
+	return rPort;
+}
+
+void Packet::setRPort(PRInt16 r)
+{
+	rPort = r;
+}
+
+PRInt16 Packet::getCmd()
+{
+	return cmd;
+}
+
+void Packet::setCmd(PRInt16 c)
+{
+	cmd = c;
+}
+
+PRInt64 Packet::fetchQWord()
+{
+	if (len < 8)
+		return -1;
+
+	PRUint64 ret = 0;
+	for (int i=0; i<8; i++)
+	{
+		ret = (ret << 8) | (unsigned char)(*ptr);
+//		printf("ret: %llx\n", ret);
+		ptr++;
+	}
+	len-=8;
+	return ret;
+}
+
+void Packet::appendQWord(PRInt64 i)
+{
+	moreSpace(8);
+//	printf("i: %llx\n", i);
+	PRUint64 ii = i;
+	PRUint64 mask = (PRUint64)0xFF << 56;
+	for (int i=0; i<8; i++)
+	{
+		*ptr = (ii & mask) >> (8*(7-i));
+//		printf("%llx ", (ii & mask));
+//		printf("%x,", (unsigned char)*ptr);
+		ptr++;
+		mask >>= 8;
+	}
+//	printf("\n");
+
+	len += 8;
 }
 

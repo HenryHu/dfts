@@ -1,4 +1,4 @@
-// Last modified: 2010-03-21 23:20:04 henryhu
+// Last modified: 2010-05-20 11:06:24 henryhu
 #include "usermanager.h"
 #include "config.h"
 #include "netmgr.h"
@@ -15,23 +15,17 @@ using namespace std;
 void UserManager::parseFindNeighbour(Packet *pkt)
 {
 	LogMsg(LOG_DEBUG,"parsing find neighbour\n");
-	PRNetAddr addr = pkt->getAddr();
 
-	pkt->fetchWord();
-	PRUint16 hisPort = pkt->fetchWord();
+	PRUint16 hisPort = pkt->getRPort();
 	string userName = pkt->fetchStr();
 	string pubKey = pkt->fetchStr();
 	// Add user to database
-	cout << "Port: " << hisPort << endl;
-	cout << "Name: " << userName << endl;
-	cout << "Key:  " << endl << pubKey << endl;
 	addUser(userName, pubKey, pkt->getAddr().inet.ip, hisPort, true);
 
 	// Send reply
 	LogMsg(LOG_DEBUG, "his port: %d\n", hisPort);
-	addr.inet.port = PR_htons(hisPort);
 	PRInt16 rtype = INT_CMD_NEIGHBOUR_REPLY;
-	Packet *rpkt = new Packet(addr, rtype, 500);
+	Packet *rpkt = new Packet(pkt->getRAddr(), rtype, 500, INTERCONNECT_PORT);
 	rpkt->appendWord(INTERCONNECT_PORT);
 	rpkt->appendStr(core->getCfgMgr()->getName());
 	rpkt->appendStr(core->getKeyMgr()->getPubKey());
@@ -41,7 +35,6 @@ void UserManager::parseFindNeighbour(Packet *pkt)
 void UserManager::parseNeighbourReply(Packet *pkt)
 {
 	LogMsg(LOG_DEBUG,"parsing neighbour reply\n");
-	pkt->fetchWord();
 }
 
 UserManager::UserManager(Core *c)
@@ -59,7 +52,7 @@ void UserManager::findNeighbour()
 	addr.inet.family = PR_AF_INET;
 	addr.inet.ip = PR_htonl(PR_INADDR_BROADCAST);
 	PRInt16 type = INT_CMD_FIND_NEIGHBOUR;
-	Packet *pkt = new Packet(addr, type, 500);
+	Packet *pkt = new Packet(addr, type, 500, INTERCONNECT_PORT);
 	pkt->appendWord(INTERCONNECT_PORT);
 	pkt->appendStr(core->getCfgMgr()->getName());
 	pkt->appendStr(core->getKeyMgr()->getPubKey());
