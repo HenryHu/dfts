@@ -1,9 +1,10 @@
-// Last Modified: 2010-03-21 22:31:44 henryhu
+// Last Modified: 2010-05-27 23:56:18 henryhu
 #ifndef __DFTS_USER_H_
 #define __DFTS_USER_H_
 #include <string>
 #include <prtypes.h>
 #include <list>
+#include <prio.h>
 
 class User {
 private:
@@ -23,6 +24,7 @@ public:
 	void setIP(PRUint32 i);
 	void setName(const std::string& n);
 	void setIter(std::list<User *>::iterator i);
+	PRNetAddr getAddr();
 };
 
 #endif // __DFTS_USER_H_

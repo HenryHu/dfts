@@ -2,9 +2,9 @@ CXX = g++
 CXXFLAGS = -I/usr/local/include/nspr -g -I/usr/local/include/cryptopp -pipe -fno-strict-aliasing `pcre++-config --cflags`
 LDFLAGS = -L/usr/local/lib  -lcryptopp -pthread -lnspr4 `pcre++-config --libs`
 SRCS = clientmanager.cpp config.cpp clientservice.cpp logger.cpp clientcommand.cpp netmgr.cpp main.cpp core.cpp usermanager.cpp filemanager.cpp \
-	   packet.cpp keymgr.cpp cfgmgr.cpp user.cpp userhash.cpp file.cpp datahash.cpp block.cpp datahasher.cpp
+	   packet.cpp keymgr.cpp cfgmgr.cpp user.cpp userhash.cpp file.cpp datahash.cpp block.cpp datahasher.cpp search.cpp searchresult.cpp searchmgr.cpp
 OBJS = clientmanager.o config.o clientservice.o logger.o clientcommand.o netmgr.o main.o core.o usermanager.o filemanager.o packet.o keymgr.o cfgmgr.o \
-	   user.o userhash.o file.o datahash.o block.o datahasher.o
+	   user.o userhash.o file.o datahash.o block.o datahasher.o search.o searchresult.o searchmgr.o
 
 all: dfts ctags
 

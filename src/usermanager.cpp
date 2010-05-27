@@ -1,4 +1,4 @@
-// Last modified: 2010-05-20 11:06:24 henryhu
+// Last modified: 2010-05-27 22:50:16 henryhu
 #include "usermanager.h"
 #include "config.h"
 #include "netmgr.h"
@@ -20,7 +20,7 @@ void UserManager::parseFindNeighbour(Packet *pkt)
 	string userName = pkt->fetchStr();
 	string pubKey = pkt->fetchStr();
 	// Add user to database
-	addUser(userName, pubKey, pkt->getAddr().inet.ip, hisPort, true);
+	addUser(userName, pubKey, PR_ntohl(pkt->getAddr().inet.ip), hisPort, true);
 
 	// Send reply
 	LogMsg(LOG_DEBUG, "his port: %d\n", hisPort);
@@ -113,3 +113,34 @@ list<User *> UserManager::getOtherList()
 	PR_Unlock(olLock);
 	return ret;
 }
+
+User *UserManager::findUser(PRUint32 ip, PRUint16 port, bool &isNeighbour)
+{
+	User *ret = NULL;
+	for (list<User*>::iterator it = neighbourList.begin();
+			it != neighbourList.end(); it++)
+	{
+		if (((*it)->getIP() == ip) && ((*it)->getPort() == port))
+		{
+			ret = *it;
+			isNeighbour = true;
+			break;
+		}
+	}
+
+	if (ret == NULL)
+	{
+		for (list<User*>::iterator it = otherList.begin();
+				it != otherList.end(); it++)
+		{
+			if (((*it)->getIP() == ip) && ((*it)->getPort() == port))
+			{
+				ret = *it;
+				isNeighbour = false;
+				break;
+			}
+		}
+	}
+	return ret;
+}
+
