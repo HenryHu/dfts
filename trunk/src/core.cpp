@@ -25,3 +25,7 @@ KeyMgr *Core::getKeyMgr()
 	return keyMgr;
 }
 
+SearchManager *Core::getSearchManager()
+{
+	return sMgr;
+}

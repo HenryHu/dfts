@@ -1,4 +1,4 @@
-// Last modified: 2010-05-27 02:08:10 henryhu
+// Last modified: 2010-05-27 23:44:48 henryhu
 #include "netmgr.h"
 #include "threadwrap.h"
 #include "config.h"
@@ -10,6 +10,7 @@
 #include "packet.h"
 #include "usermanager.h"
 #include "filemanager.h"
+#include "searchmgr.h"
 #include <iostream>
 using namespace std;
 
@@ -272,7 +273,7 @@ void NetMgr::parsePacket(Packet *pkt)
 			break;
 		case INT_CMD_FIND_FILE_BY_NAME_REPLY:
 			LogMsg(LOG_DEBUG, "got find file by name reply\n");
-			core->getFileManager()->parseFindFileByNameReply(pkt);
+			core->getSearchManager()->parseFindFileByNameReply(pkt);
 			break;
 		case INT_CMD_FIND_FILE_BY_ID:
 //			core->getFileManager()->parseFindBlockByID(pkt);

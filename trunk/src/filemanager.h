@@ -1,4 +1,4 @@
-// Last modified: 2010-05-27 01:37:14 henryhu
+// Last modified: 2010-05-27 22:25:08 henryhu
 
 #ifndef __DFTS_FILEMANAGER_H_
 #define __DFTS_FILEMANAGER_H_
@@ -22,8 +22,6 @@ private:
 	PRLock *fileLock;
 
 public:
-	void parseFindFileByName(Packet *pkt);
-	void parseFindFileByNameReply(Packet *pkt);
 	void parseGetFileInformation(Packet *pkt);
 	void parseGetFileInfoReply(Packet *pkt);
 	FileManager(Core *c);
@@ -37,11 +35,10 @@ public:
 	void lockFiles();
 	void unlockFiles();
 	int addLocalDir(const std::string& path);
-	void sendSearch(
-		const PRNetAddr &receiver, PRInt32 id, const std::string& pattern);
 	void sendGetFileInfo(
 		const PRNetAddr &receiver, const std::string& fileName, 
 		const DataHash& hash, PRInt64 length);
+	void parseFindFileByName(Packet *pkt);
 };
 
 #endif // __DFTS_FILEMANAGER_H_

@@ -1,4 +1,4 @@
-// Last modified: 2010-05-27 02:27:58 henryhu
+// Last modified: 2010-05-27 22:25:21 henryhu
 
 #include "filemanager.h"
 #include "config.h"
@@ -41,30 +41,6 @@ void FileManager::parseFindFileByName(Packet *pkt)
 	unlockFiles();
 	rpkt->appendByte(0);
 	core->getNetMgr()->sendMsg(rpkt, rtype);
-}
-
-void FileManager::parseFindFileByNameReply(Packet *pkt)
-{
-	// Pakcet format:
-	// DWord ID
-	// [
-	//	Byte itemType = 1
-	//	String fileName
-	//	String hash
-	//	QWord length
-	// ]
-	// Byte endTag = 0
-	
-	PRInt32 id = pkt->fetchInt();
-	LogMsg(LOG_INFO, "received reply to query %d\n", id);
-	while (pkt->fetchByte() == 1)
-	{
-		string fileName = pkt->fetchStr();
-		DataHash hash(pkt->fetchStr());
-		PRInt64 length = pkt->fetchQWord();
-		LogMsg(LOG_EXTEND, "name: %s len: %lld hash: %s\n", 
-				fileName.c_str(), length, hash.toStr().c_str());
-	}
 }
 
 void FileManager::parseGetFileInformation(Packet *pkt)
@@ -142,6 +118,7 @@ void FileManager::parseGetFileInfoReply(Packet *pkt)
 				break;
 			}
 			Block *lastBlock = NULL;
+			lockBlocks();
 			while (pkt->fetchByte() == 1)
 			{
 				DataHash blockHash(pkt->fetchStr());
@@ -157,6 +134,7 @@ void FileManager::parseGetFileInfoReply(Packet *pkt)
 				addHashBlock(block);
 				lastBlock = block;
 			}
+			unlockBlocks();
 			file->unlock();
 			break;
 	}
@@ -353,16 +331,6 @@ void FileManager::lockFiles()
 void FileManager::unlockFiles()
 {
 	PR_Unlock(fileLock);
-}
-
-void FileManager::sendSearch(
-		const PRNetAddr &receiver, PRInt32 id, const string& pattern)
-{
-	PRInt16 type = INT_CMD_FIND_FILE_BY_NAME;
-	Packet *pkt = new Packet(receiver, type, 100, INTERCONNECT_PORT);
-	pkt->appendInt(id);
-	pkt->appendStr(pattern);
-	core->getNetMgr()->sendMsg(pkt, type);
 }
 
 void FileManager::sendGetFileInfo(

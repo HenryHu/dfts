@@ -1,4 +1,4 @@
-// Last modified: 2010-03-21 23:13:41 henryhu
+// Last modified: 2010-05-27 23:43:39 henryhu
 #ifndef __DFTS_USERMANAGER_H_
 #define __DFTS_USERMANAGER_H_
 
@@ -24,6 +24,7 @@ public:
 	void parseNeighbourReply(Packet *pkt);
 	UserManager(Core *c);
 	void findNeighbour();
+	User* findUser(PRUint32 ip, PRUint16 port, bool& isNeighbour);
 	void addUser(const std::string& name, const std::string& key, PRUint32 ip, PRUint16 port,
 			bool isNeighbour);
 	std::list<User *> getNeighbourList();

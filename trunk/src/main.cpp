@@ -9,6 +9,7 @@
 #include "datahasher.h"
 #include <iostream>
 #include "filemanager.h"
+#include "searchmgr.h"
 using namespace std;
 
 int main()
@@ -28,16 +29,22 @@ int main()
 	NetMgr mr(addr, INTERCONNECT_PORT, INTERCONNECT_PORT, core);
 	FileManager fm(core);
 	fm.addLocalDir("/tmp/plugtmp-1");
+	SearchManager sm(core);
 	core->setNetMgr(&mr);
 	core->setUserMgr(um);
 	core->setKeyMgr(km);
 	core->setCfgMgr(cfgm);
 	core->setFileMgr(&fm);
+	core->setSearchMgr(&sm);
 	mr.start();
+	sleep(1);
+	um->findNeighbour();
 
-	PR_StringToNetAddr("192.168.1.109", &addr);
+	PR_StringToNetAddr("59.66.132.114", &addr);
 	addr.inet.port = PR_htons(INTERCONNECT_PORT);
-	fm.sendSearch(addr, 12345, ".*");
+//	sm.sendSearch(addr, 1, ".*");
+	sleep(1);
+	sm.performSearch(".*");
 	fm.sendGetFileInfo(addr, "plugin-crossdomain.xml", DataHash("92498502AB185CF12C0C8BC8CA7AE14964FC97BE"), 145);
 
 	PR_JoinThread(cm.getThread());

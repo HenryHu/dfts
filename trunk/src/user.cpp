@@ -1,8 +1,9 @@
-// Last Modified: 2010-03-21 22:31:57 henryhu
+// Last Modified: 2010-05-27 23:56:55 henryhu
 
 #include "user.h"
 #include <prtypes.h>
 #include <string>
+#include <prnetdb.h>
 using namespace std;
 
 User::User(const string& n, const string& k, PRUint32 i, PRUint16 p)
@@ -47,3 +48,13 @@ PRUint32 User::getIP()
 {
 	return ip;
 }
+
+PRNetAddr User::getAddr()
+{
+	PRNetAddr ret;
+	ret.inet.ip = PR_htonl(ip);
+	ret.inet.port = PR_htons(port);
+	ret.inet.family = AF_INET;
+	return ret;
+}
+
